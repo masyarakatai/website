@@ -1,0 +1,37 @@
+[Unit]
+Description=HuShield marketing site
+Documentation=https://github.com/Hushield/website
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hushield-web
+Group=hushield-web
+WorkingDirectory=/opt/hushield-web
+ExecStart=/opt/hushield-web/bin/hushield-web
+EnvironmentFile=/opt/hushield-web/.env
+Restart=on-failure
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hushield-web
+
+# The binary embeds its templates and assets and holds no state, so it needs no
+# writable paths at all beyond /tmp.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictSUIDSGID=yes
+
+[Install]
+WantedBy=multi-user.target

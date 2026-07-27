@@ -1,0 +1,57 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} — HuShield</title>
+<meta name="description" content="{{.Description}}">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span> HuShield</a>
+  <nav aria-label="Main">
+    <a href="/features" {{if eq .Nav "features"}}aria-current="page"{{end}}>Features</a>
+    <a href="/changelog" {{if eq .Nav "changelog"}}aria-current="page"{{end}}>Changelog</a>
+    <a href="/contributors" {{if eq .Nav "contributors"}}aria-current="page"{{end}}>Contributors</a>
+    <a href="/contribute" {{if eq .Nav "contribute"}}aria-current="page"{{end}}>Contribute</a>
+    <a class="ext" href="https://github.com/Hushield/hushield">GitHub</a>
+  </nav>
+</header>
+
+<main id="main">
+{{template "content" .}}
+</main>
+
+<footer class="site-foot">
+  <div>
+    <strong>HuShield</strong> — free, open source, and holds no personal data.
+  </div>
+  <div class="foot-links">
+    <a href="https://github.com/Hushield/hushield">Source</a>
+    <a href="https://github.com/Hushield/hushield/blob/main/LICENSE">Apache-2.0</a>
+    <a href="https://github.com/Hushield/hushield/blob/main/TRADEMARK.md">Trademark</a>
+    <a href="https://github.com/Hushield/hushield/blob/main/CONTRIBUTING.md">Contributing</a>
+  </div>
+</footer>
+</body>
+</html>{{end}}
+
+{{/* Freshness disclosure. Rendered whenever data is stale or unavailable so a
+     broken integration can never be mistaken for an empty result. */}}
+{{define "freshness"}}
+  {{if not .OK}}
+    <p class="notice notice-down" role="status">
+      Live GitHub data is temporarily unavailable, so this section is empty —
+      that is a problem on our side, not an empty project.
+      <a href="https://github.com/Hushield/hushield">View it on GitHub instead.</a>
+    </p>
+  {{else if .Stale}}
+    <p class="notice notice-stale" role="status">
+      Showing the last known data from {{.LastSuccess.Format "15:04 MST on 2 Jan"}} —
+      the most recent refresh from GitHub failed.
+    </p>
+  {{end}}
+{{end}}

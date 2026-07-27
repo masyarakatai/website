@@ -1,0 +1,56 @@
+{{define "content"}}
+<section class="page-head">
+  <h1>Contributors</h1>
+  <p class="lede">
+    Ranked by merged pull requests — the thing that actually moves the project. Lines changed is
+    shown because people like seeing it, but it is never what decides the order: that would reward
+    a big reformatting commit over a twelve-line fix to a race condition.
+  </p>
+</section>
+
+{{template "freshness" .Freshness}}
+
+{{if .Leaderboard.NewThisMonth}}
+<section class="newcomers">
+  <h2>New contributors this month</h2>
+  <p class="sub">Proof that outside PRs get merged here.</p>
+  <ul class="avatar-row">
+    {{range .Leaderboard.NewThisMonth}}
+    <li><a href="{{.HTMLURL}}"><img src="{{.AvatarURL}}" alt="" width="48" height="48" loading="lazy"><span>{{.Login}}</span></a></li>
+    {{end}}
+  </ul>
+</section>
+{{end}}
+
+{{if .Leaderboard.Rows}}
+<section>
+  <h2>Leaderboard</h2>
+  <div class="table-wrap">
+  <table class="board">
+    <thead><tr>
+      <th scope="col">#</th><th scope="col">Contributor</th>
+      <th scope="col" class="num">Merged PRs</th>
+      <th scope="col" class="num">Commits</th>
+      <th scope="col" class="num">Lines changed</th>
+    </tr></thead>
+    <tbody>
+      {{range $i, $r := .Leaderboard.Rows}}
+      <tr>
+        <td class="rank">{{add $i 1}}</td>
+        <td><a class="who" href="{{$r.HTMLURL}}"><img src="{{$r.AvatarURL}}" alt="" width="28" height="28" loading="lazy">{{$r.Login}}</a></td>
+        <td class="num strong">{{$r.MergedPRs}}</td>
+        <td class="num">{{$r.Commits}}</td>
+        <td class="num dim">+{{$r.Added}} / -{{$r.Deleted}}</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  </div>
+</section>
+{{else if .Freshness.OK}}
+<p class="empty">
+  No contributors beyond the maintainer yet. That is exactly the gap this site exists to close —
+  <a href="/contribute">the first merged PR could be yours</a>.
+</p>
+{{end}}
+{{end}}

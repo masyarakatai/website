@@ -1,0 +1,70 @@
+{{define "content"}}
+<section class="hero">
+  <p class="eyebrow">Free forever · Open source · Apache-2.0</p>
+  <h1>Your phone stops ringing<br>with garbage.</h1>
+  <p class="lede">
+    HuShield is a community-powered spam call and text filter for iPhone. People report
+    bad numbers, those reports fold into a shared reputation score, and every device pulls
+    the resulting blocklist automatically.
+  </p>
+  <p class="lede claim">
+    <strong>It knows nothing about you.</strong> No account. No sign-up. Your phone number is
+    never sent anywhere. Your contacts are never uploaded. The only identity in the entire
+    system is an anonymous hardware key your iPhone generates.
+  </p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="/features">See what it does</a>
+    <a class="btn btn-contrib" href="/contribute">Help build it →</a>
+  </div>
+</section>
+
+<section class="stats" aria-label="Project statistics">
+  {{template "freshness" .Stats.Freshness}}
+  <ul class="stat-grid">
+    <li><span class="stat-n">{{.Stats.Stars}}</span><span class="stat-l">Stars</span></li>
+    <li><span class="stat-n">{{.Stats.Contributors}}</span><span class="stat-l">Contributors</span></li>
+    <li><span class="stat-n">{{.Stats.MergedPRs}}</span><span class="stat-l">Merged PRs</span></li>
+    <li><span class="stat-n">{{.Stats.OpenIssues}}</span><span class="stat-l">Open issues</span></li>
+    <li class="stat-hl"><span class="stat-n">{{.Stats.GoodFirst}}</span><span class="stat-l">Good first issues</span></li>
+  </ul>
+</section>
+
+<section class="how">
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li>
+      <h3>Someone reports a number</h3>
+      <p>A spam call comes in. One tap marks it. No form, no account, no personal detail attached.</p>
+    </li>
+    <li>
+      <h3>The community's reports are weighed</h3>
+      <p>Reports are combined into a score that decays over time, so a number that stopped calling
+      stops being blocked. Each device's influence depends on how often its past reports matched
+      what everyone else concluded — which makes coordinated abuse expensive.</p>
+    </li>
+    <li>
+      <h3>Every phone gets the result</h3>
+      <p>Devices pull a compact update. Known-bad numbers are blocked outright, borderline ones are
+      labelled so you can decide. Text filtering runs entirely on-device, even in airplane mode.</p>
+    </li>
+  </ol>
+</section>
+
+<section class="why-open">
+  <h2>Why this is open source</h2>
+  <p>
+    Every other app in this category asks you to hand over your contact list. That is the business
+    model: your address book is the product. HuShield cannot do that, because there is nowhere in the
+    schema to put it.
+  </p>
+  <p>
+    You should not have to take that on faith. <a href="https://github.com/Hushield/hushield">Read the
+    code.</a> The scoring engine is a pure function, the database has five tables, and the only
+    identifier anywhere is an Apple App Attest key. If we ever added tracking, the diff would be
+    public.
+  </p>
+  <div class="cta-row">
+    <a class="btn btn-contrib" href="/contribute">Contribute →</a>
+  </div>
+</section>
+{{end}}

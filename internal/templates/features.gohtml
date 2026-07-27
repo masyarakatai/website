@@ -1,0 +1,42 @@
+{{define "content"}}
+<section class="page-head">
+  <h1>Everything HuShield does</h1>
+  <p class="lede">
+    The complete feature system, with honest status. Anything that has never run against real
+    hardware or a real deployment is not marked shipped — including some things that work fine in
+    tests.
+  </p>
+  <ul class="legend">
+    <li><span class="pill pill-shipped">Shipped</span> verified working</li>
+    <li><span class="pill pill-progress">In progress</span> built, not yet verified end to end</li>
+    <li><span class="pill pill-help">Help wanted</span> open for contributors</li>
+  </ul>
+</section>
+
+{{range .Groups}}
+<section class="feat-group">
+  <h2>{{.AreaLabel}}</h2>
+  <ul class="feat-list">
+    {{range .Features}}
+    <li class="feat">
+      <div class="feat-top">
+        <h3>{{.Title}}</h3>
+        <span class="pill pill-{{if eq .Status "shipped"}}shipped{{else if eq .Status "in-progress"}}progress{{else if eq .Status "help-wanted"}}help{{else}}planned{{end}}">{{.StatusLabel}}</span>
+      </div>
+      <p>{{.Summary}}</p>
+      <p class="feat-meta">
+        {{if .Requirement}}<span class="req">{{.Requirement}}</span>{{end}}
+        {{if .IssueURL}}<a class="claim" href="{{.IssueURL}}">Claim issue #{{.Issue}} →</a>{{end}}
+      </p>
+    </li>
+    {{end}}
+  </ul>
+</section>
+{{end}}
+
+<section class="cta-block">
+  <h2>{{.HelpWantedCount}} of these need a hand</h2>
+  <p>Each one links to a real, claimable GitHub issue with context on where to start.</p>
+  <a class="btn btn-contrib" href="/contribute">See how to contribute →</a>
+</section>
+{{end}}

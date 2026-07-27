@@ -1,0 +1,31 @@
+{{define "content"}}
+<section class="page-head">
+  <h1>Changelog</h1>
+  <p class="lede">Every release, newest first. Pulled live from GitHub Releases.</p>
+</section>
+
+{{template "freshness" .Freshness}}
+
+{{if .Releases}}
+<ol class="releases">
+  {{range .Releases}}
+  <li class="release">
+    <div class="release-head">
+      <h2><a href="{{.URL}}">{{.Name}}</a></h2>
+      <span class="release-meta">
+        <code>{{.Tag}}</code>
+        <time datetime="{{.PublishedISO}}">{{.PublishedHuman}}</time>
+        {{if .Prerelease}}<span class="pill pill-planned">Pre-release</span>{{end}}
+      </span>
+    </div>
+    <div class="release-body">{{.BodyHTML}}</div>
+  </li>
+  {{end}}
+</ol>
+{{else if .Freshness.OK}}
+<p class="empty">
+  No releases published yet. Work in progress is visible on
+  <a href="https://github.com/Hushield/hushield/commits/main">the commit log</a>.
+</p>
+{{end}}
+{{end}}

@@ -1,0 +1,139 @@
+{{define "content"}}
+<section class="page-head">
+  <h1>Contribute to HuShield</h1>
+  <p class="lede">
+    This is a small project that needs help, and it is honest about that. Below is real work with
+    real context — not a wall of "good first issue" labels slapped on things nobody scoped.
+  </p>
+</section>
+
+<section class="constraint">
+  <h2>One rule before you start</h2>
+  <p>
+    <strong>HuShield holds no personally identifiable information, anywhere, by design.</strong>
+    The only identity in the system is an Apple App Attest key. No accounts, no phone numbers tied
+    to reporters, no contact data, no analytics identifiers.
+  </p>
+  <p>
+    This is not a preference that might get traded away later — it is the product. A pull request
+    that introduces a user identifier will be declined however well it is written. If a feature
+    seems to need identity, open an issue and let's find another route. There usually is one.
+  </p>
+</section>
+
+{{template "freshness" .Freshness}}
+
+{{if .GoodFirst}}
+<section>
+  <h2>Good first issues</h2>
+  <p class="sub">Small, scoped, and they do not require understanding the whole system.</p>
+  <ul class="issues">
+    {{range .GoodFirst}}
+    <li class="issue">
+      <a class="issue-title" href="{{.URL}}">#{{.Number}} · {{.Title}}</a>
+      <span class="issue-meta">
+        {{range .Labels}}<span class="tag">{{.}}</span>{{end}}
+        <span class="dim">opened {{.Age}}</span>
+        {{if .Claimed}}<span class="pill pill-planned">claimed by {{.ClaimedBy}}</span>{{end}}
+      </span>
+    </li>
+    {{end}}
+  </ul>
+</section>
+{{end}}
+
+{{if .HelpWanted}}
+<section>
+  <h2>Help especially wanted</h2>
+  <ul class="issues">
+    {{range .HelpWanted}}
+    <li class="issue">
+      <a class="issue-title" href="{{.URL}}">#{{.Number}} · {{.Title}}</a>
+      <span class="issue-meta">
+        {{range .Labels}}<span class="tag">{{.}}</span>{{end}}
+        <span class="dim">opened {{.Age}}</span>
+      </span>
+    </li>
+    {{end}}
+  </ul>
+</section>
+{{end}}
+
+{{if .RecentMerged}}
+<section class="merged">
+  <h2>Recently merged</h2>
+  <p class="sub">What landed lately, so you can see the review actually moves.</p>
+  <ul class="issues">
+    {{range .RecentMerged}}
+    <li class="issue">
+      <a class="issue-title" href="{{.URL}}">#{{.Number}} · {{.Title}}</a>
+      <span class="issue-meta"><span class="dim">by {{.Author}} · merged {{.When}}</span></span>
+    </li>
+    {{end}}
+  </ul>
+</section>
+{{end}}
+
+<section class="setup">
+  <h2>Getting set up</h2>
+  <p>You need Go, MySQL 8+, and — for iOS work — Xcode plus <code>xcodegen</code>.</p>
+  <pre><code>git clone https://github.com/Hushield/hushield.git
+cd hushield
+
+# Backend
+DB_DSN='root@tcp(127.0.0.1:3306)/spamfilter_dev?parseTime=true&amp;multiStatements=true' \
+ADMIN_TOKEN=changeme go run ./cmd/server
+
+# The full test gate — this is what "green" means
+make test</code></pre>
+
+  <h3>Two things that will save you time</h3>
+  <ul class="gotchas">
+    <li>
+      <strong><code>ios/SpamFilter.xcodeproj</code> is generated.</strong> Never edit it. Change
+      <code>ios/project.yml</code> and run <code>xcodegen generate</code>. A PR that hand-edits the
+      project file will conflict with everyone.
+    </li>
+    <li>
+      <strong><code>ATTEST_MODE</code> defaults to <code>mock</code>,</strong> which accepts any
+      attestation. Correct for local development, never for production. Only <code>mock</code> and
+      <code>apple</code> are accepted — anything else refuses to start rather than quietly falling
+      back to the mock verifier.
+    </li>
+    <li>
+      <strong>The Go suite runs with <code>-race</code>.</strong> If you add concurrency, expect the
+      detector to find what you missed. That is the point.
+    </li>
+    <li>
+      <strong>Integration tests self-skip.</strong> They need
+      <code>SPAMFILTER_INTEGRATION_BASE_URL</code> set, so they will not fail your run when no
+      backend is up.
+    </li>
+  </ul>
+
+  <h3>How the code is laid out</h3>
+  <p>
+    <code>internal/scoring</code> and <code>internal/trust</code> are pure, dependency-free, and at
+    100% and 95% coverage. They are the easiest place to start reading and the easiest to test —
+    please keep them that way. <code>internal/store</code> is the only package that touches SQL.
+    <code>ios/SpamFilterKit</code> holds everything shared between the app and its two extensions.
+  </p>
+
+  <div class="cta-row">
+    <a class="btn btn-primary" href="https://github.com/Hushield/hushield/blob/main/CONTRIBUTING.md">Read CONTRIBUTING.md</a>
+    <a class="btn btn-contrib" href="https://github.com/Hushield/hushield/issues">Browse all issues →</a>
+  </div>
+</section>
+
+<section class="expectations">
+  <h2>What to expect from us</h2>
+  <p>
+    Reviews come from a small team, so turnaround varies. If a PR sits for a week with no response,
+    comment on it — that is a useful nudge, not nagging.
+  </p>
+  <p>
+    Not every PR gets merged. If yours is declined it will be about scope or approach, and you will
+    get the reasoning rather than silence.
+  </p>
+</section>
+{{end}}
