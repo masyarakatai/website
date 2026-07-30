@@ -169,6 +169,22 @@ type featuresData struct {
 }
 
 func (s *Server) features(w http.ResponseWriter, _ *http.Request) {
+	// The catalog's status is hand-maintained, so a help-wanted entry can outlive
+	// the issue it points at -- which means advertising claimable work that is
+	// already done, and sending a would-be contributor to a closed issue.
+	//
+	// Cross-check against the live issue snapshot instead of trusting the file.
+	// Only when the snapshot is usable: if GitHub is unreachable we know nothing
+	// about issue state and must not silently reclassify the whole roadmap.
+	issues := s.snaps.Issues.Load()
+	openIssues := map[int]bool{}
+	if issues.OK() {
+		for _, i := range issues.Value {
+			openIssues[i.Number] = true
+		}
+	}
+	trustIssueState := issues.OK() && len(openIssues) > 0
+
 	order := []catalog.Area{catalog.AreaIOS, catalog.AreaBackend, catalog.AreaOps}
 	groups := make([]featureGroup, 0, len(order))
 
@@ -178,12 +194,24 @@ func (s *Server) features(w http.ResponseWriter, _ *http.Request) {
 			if f.Area != area {
 				continue
 			}
+			status := f.Status
+			// A help-wanted feature whose issue is no longer open is finished
+			// work the catalog has not caught up with. Show it as shipped and
+			// drop the claim link rather than inviting a click into a closed issue.
+			staleClaim := trustIssueState &&
+				f.Status == catalog.HelpWanted &&
+				f.Issue > 0 &&
+				!openIssues[f.Issue]
+			if staleClaim {
+				status = catalog.Shipped
+			}
+
 			vm := featureVM{
 				Title: f.Title, Summary: f.Summary,
-				Status: string(f.Status), StatusLabel: f.Status.Label(),
+				Status: string(status), StatusLabel: status.Label(),
 				Requirement: f.Requirement, Issue: f.Issue,
 			}
-			if f.Issue > 0 {
+			if f.Issue > 0 && !staleClaim {
 				vm.IssueURL = fmt.Sprintf("https://github.com/%s/%s/issues/%d",
 					s.cfg.Owner, s.cfg.Repo, f.Issue)
 			}
@@ -194,6 +222,16 @@ func (s *Server) features(w http.ResponseWriter, _ *http.Request) {
 		}
 	}
 
+	// Count what a visitor can actually claim right now.
+	claimable := 0
+	for _, g := range groups {
+		for _, f := range g.Features {
+			if f.Status == string(catalog.HelpWanted) {
+				claimable++
+			}
+		}
+	}
+
 	s.render(w, "features", featuresData{
 		pageMeta: pageMeta{
 			Title:       "Features",
@@ -201,7 +239,7 @@ func (s *Server) features(w http.ResponseWriter, _ *http.Request) {
 			Nav:         "features",
 		},
 		Groups:          groups,
-		HelpWantedCount: catalog.Counts()[catalog.HelpWanted],
+		HelpWantedCount: claimable,
 	})
 }
 

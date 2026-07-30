@@ -43,10 +43,13 @@ func populated() *cache.Snapshots {
 		PublishedAt: testNow.Add(-24 * time.Hour),
 		HTMLURL:     "https://github.com/Hushield/hushield/releases/tag/v0.1.0",
 	}}, testNow)
+	// These numbers match the issues the catalog's help-wanted entries reference.
+	// The features page cross-checks against this snapshot, so a fixture that
+	// disagrees with the catalog would (correctly) hide every claim link.
 	s.Issues.Publish([]github.Issue{
-		{Number: 1, Title: "Dockerfile never built", HTMLURL: "u1",
+		{Number: 10, Title: "Add a CI workflow", HTMLURL: "u10",
 			Labels: []github.Label{{Name: "good-first-issue"}}, CreatedAt: testNow.Add(-48 * time.Hour)},
-		{Number: 8, Title: "Real App Attest unverified", HTMLURL: "u8",
+		{Number: 13, Title: "Strict mode for unknown callers", HTMLURL: "u13",
 			Labels: []github.Label{{Name: "help-wanted"}}, CreatedAt: testNow.Add(-72 * time.Hour)},
 	}, testNow)
 	s.PullRequests.Publish([]github.PullRequest{
@@ -203,10 +206,10 @@ func TestContribute_ShowsIssuesAndTheNoPIIRule(t *testing.T) {
 	h := newTestServer(t, populated())
 	body := get(t, h, "/contribute").Body.String()
 
-	if !strings.Contains(body, "Dockerfile never built") {
+	if !strings.Contains(body, "Add a CI workflow") {
 		t.Error("good-first-issue not listed")
 	}
-	if !strings.Contains(body, "Real App Attest unverified") {
+	if !strings.Contains(body, "Strict mode for unknown callers") {
 		t.Error("help-wanted issue not listed")
 	}
 	if !strings.Contains(body, "no personally identifiable information") {
@@ -256,5 +259,48 @@ func TestRenderMarkdown_Lists(t *testing.T) {
 	}
 	if !strings.Contains(got, "<p>after</p>") {
 		t.Errorf("paragraph after list not rendered: %q", got)
+	}
+}
+
+// A help-wanted feature whose issue has been CLOSED must not be advertised as
+// claimable. The catalog's status is hand-maintained, so it inevitably lags
+// behind the tracker -- and the failure mode is sending a would-be contributor
+// to a closed issue, which is worse than showing nothing.
+func TestFeatures_ClosedIssueIsNotAdvertisedAsClaimable(t *testing.T) {
+	s := populated()
+	// Snapshot contains only #13 as open, so every help-wanted entry pointing at
+	// #10 is now stale.
+	s.Issues.Publish([]github.Issue{
+		{Number: 13, Title: "Strict mode", HTMLURL: "u13",
+			Labels: []github.Label{{Name: "help-wanted"}}, CreatedAt: testNow},
+	}, testNow)
+
+	body := get(t, newTestServer(t, s), "/features").Body.String()
+
+	if strings.Contains(body, "/issues/10") {
+		t.Error("a claim link to closed issue #10 is still rendered")
+	}
+	// #13 is still open, so its link must survive -- the guard must not blanket
+	// suppress every link.
+	if !strings.Contains(body, "/issues/13") {
+		t.Error("the claim link for still-open issue #13 was suppressed")
+	}
+}
+
+// If GitHub is unreachable we know nothing about issue state, so the catalog
+// must be shown as-authored rather than silently reclassified wholesale.
+func TestFeatures_UnavailableIssuesDoesNotReclassify(t *testing.T) {
+	s := populated()
+	s.Issues.Fail(errors.New("github: 503"))
+	// Fail() on a previously-published dataset keeps it Stale (still usable), so
+	// start from a store that never succeeded to get Unavailable.
+	empty := cache.NewSnapshots()
+	empty.Repo.Publish(github.Repo{Stars: 1}, testNow)
+
+	body := get(t, newTestServer(t, empty), "/features").Body.String()
+
+	// With no issue data, help-wanted entries keep their authored status and links.
+	if !strings.Contains(body, "Help wanted") {
+		t.Error("help-wanted statuses were reclassified despite unavailable issue data")
 	}
 }

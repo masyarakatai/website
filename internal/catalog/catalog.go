@@ -145,13 +145,13 @@ var Features = []Feature{
 	},
 	{
 		ID: "docker-image", Title: "Verified container image",
-		Summary: "The Dockerfile has never been built — it was authored without a Docker daemon and sets no GOARCH. Production uses systemd instead. Fixing or removing it are both welcome.",
-		Status:  HelpWanted, Area: AreaOps, Issue: 1,
+		Summary: "Builds for linux/amd64 and linux/arm64, with GOARCH derived from the build target so a cross-build cannot silently produce a binary for the wrong architecture. The compose stack passes the full smoke lifecycle.",
+		Status:  Shipped, Area: AreaOps,
 	},
 	{
 		ID: "prod-smoke", Title: "Production smoke test",
-		Summary: "The existing smoke test fabricates attestations, so it only works against a mock-mode server and cannot verify a real deployment.",
-		Status:  HelpWanted, Area: AreaOps, Issue: 2,
+		Summary: "17 checks against the live deployment, run automatically after every deploy. Proves negatives too: a forged attestation must be rejected, so a server accidentally left in mock mode fails the gate.",
+		Status:  Shipped, Area: AreaOps,
 	},
 	{
 		ID: "strict-mode", Title: "Strict mode for unknown callers",
