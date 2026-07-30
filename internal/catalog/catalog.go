@@ -154,6 +154,26 @@ var Features = []Feature{
 		Status:  Shipped, Area: AreaOps,
 	},
 	{
+		ID: "live-caller-id", Title: "Real-time blocking (Live Caller ID Lookup)",
+		Summary: "Block on the live community score at the moment a call arrives, instead of waiting for the next blocklist sync. Uses Apple's privacy-preserving encrypted lookup, so the server never learns which number was queried.",
+		Status:  HelpWanted, Area: AreaIOS, Issue: 20,
+	},
+	{
+		ID: "first-run-enrolment", Title: "Clearer first-run setup",
+		Summary: "The Status tab says \"Not enrolled yet\" without an obvious way to fix it \u2014 enrolment happens as a side effect of the first sync. It should be something you can just do.",
+		Status:  HelpWanted, Area: AreaIOS, Issue: 14,
+	},
+	{
+		ID: "targeted-push", Title: "Only wake devices that need it",
+		Summary: "Silent refresh pushes currently go to every device after every recompute, whether or not that device's blocklist changed. Targeting the ones actually affected saves everyone else's battery.",
+		Status:  HelpWanted, Area: AreaBackend, Issue: 18,
+	},
+	{
+		ID: "ios-ci", Title: "iOS tests in CI",
+		Summary: "134 iOS tests run only on a maintainer's laptop, so an iOS pull request can't be verified before a human builds it. Needs a macOS runner and a durable fix for Xcode/simulator-runtime mismatches.",
+		Status:  HelpWanted, Area: AreaOps, Issue: 17,
+	},
+	{
 		ID: "strict-mode", Title: "Strict mode for unknown callers",
 		Summary: "Silence callers who aren't in your contacts, but let numbers the community has vouched for ring through anyway \u2014 so you don't lose the pharmacy and the school along with the spam.",
 		Status:  HelpWanted, Area: AreaIOS, Issue: 13,
