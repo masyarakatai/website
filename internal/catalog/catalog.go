@@ -131,17 +131,17 @@ var Features = []Feature{
 	{
 		ID: "reporting-ui", Title: "In-app reporting and caller ID",
 		Summary: "Report spam or not-spam, look up a number, and contribute a community caller-ID name.",
-		Status:  InProgress, Area: AreaIOS, Requirement: "REQ-10",
+		Status:  Shipped, Area: AreaIOS, Requirement: "REQ-10",
 	},
 	{
 		ID: "appgroup-sync", Title: "Shared App Group sync",
 		Summary: "One framework handles App Attest enrolment, token refresh, and blocklist delta sync, shared across the app and both extensions via an App Group.",
-		Status:  InProgress, Area: AreaIOS, Requirement: "REQ-11",
+		Status:  Shipped, Area: AreaIOS, Requirement: "REQ-11",
 	},
 	{
 		ID: "prod-hardening", Title: "Production hardening",
 		Summary: "Real App Attest validated on physical hardware, a shared challenge store for multi-instance deploys, and scheduled score recomputation.",
-		Status:  InProgress, Area: AreaOps, Requirement: "REQ-12",
+		Status:  Shipped, Area: AreaOps, Requirement: "REQ-12",
 	},
 	{
 		ID: "docker-image", Title: "Verified container image",
@@ -154,14 +154,19 @@ var Features = []Feature{
 		Status:  HelpWanted, Area: AreaOps, Issue: 2,
 	},
 	{
+		ID: "strict-mode", Title: "Strict mode for unknown callers",
+		Summary: "Silence callers who aren't in your contacts, but let numbers the community has vouched for ring through anyway \u2014 so you don't lose the pharmacy and the school along with the spam.",
+		Status:  HelpWanted, Area: AreaIOS, Issue: 13,
+	},
+	{
 		ID: "ci", Title: "Continuous integration",
 		Summary: "There is no CI. The test gate lives in a local Makefile, which means a contributor cannot see their PR pass before a maintainer runs it by hand.",
 		Status:  HelpWanted, Area: AreaOps, Issue: 10,
 	},
 	{
 		ID: "real-attest", Title: "Verified real App Attest",
-		Summary: "Apple App Attest verification has only ever been exercised against injected test material. No genuine attestation from a physical iPhone has been verified end to end.",
-		Status:  HelpWanted, Area: AreaBackend, Issue: 8,
+		Summary: "Apple App Attest verified end to end against production from a physical iPhone \u2014 confirmed by the Apple-issued attestation receipt stored server-side, with fabricated attestations correctly rejected.",
+		Status:  Shipped, Area: AreaBackend, Requirement: "REQ-05",
 	},
 }
 
