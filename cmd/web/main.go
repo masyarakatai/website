@@ -47,7 +47,7 @@ func run(logger *log.Logger) error {
 
 	client := github.New(cfg.Owner, cfg.Repo, cfg.GitHubToken)
 	snaps := cache.NewSnapshots()
-	poller := cache.NewPoller(client, snaps, cache.Intervals{}, logger)
+	poller := cache.NewPoller(client, snaps, cache.Intervals{Unauthenticated: !cfg.TokenConfigured()}, logger)
 
 	srv, err := handlers.New(cfg, snaps, logger)
 	if err != nil {

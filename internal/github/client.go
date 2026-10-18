@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -40,9 +41,19 @@ type Client struct {
 	repo    string
 	http    *http.Client
 
-	mu    sync.Mutex
-	etags map[string]string
+	mu        sync.Mutex
+	etags     map[string]string
+	rateLimit RateLimit
 }
+
+// RateLimit is the most recently observed GitHub API budget.
+type RateLimit struct {
+	Remaining int
+	Reset     time.Time
+}
+
+// RateLimit returns the budget observed on the latest GitHub response.
+func (c *Client) RateLimit() RateLimit { c.mu.Lock(); defer c.mu.Unlock(); return c.rateLimit }
 
 // Option customizes a Client.
 type Option func(*Client)
@@ -105,6 +116,17 @@ func (c *Client) get(ctx context.Context, path string, out any) error {
 		_, _ = io.Copy(io.Discard, resp.Body)
 		_ = resp.Body.Close()
 	}()
+	// GitHub sends these headers on successful, conditional, and error responses.
+	// Record them before classifying the response so operators can see depletion
+	// before the API starts refusing requests.
+	c.mu.Lock()
+	if remaining, err := strconv.Atoi(resp.Header.Get("X-RateLimit-Remaining")); err == nil {
+		c.rateLimit.Remaining = remaining
+	}
+	if reset, err := strconv.ParseInt(resp.Header.Get("X-RateLimit-Reset"), 10, 64); err == nil {
+		c.rateLimit.Reset = time.Unix(reset, 0)
+	}
+	c.mu.Unlock()
 
 	switch {
 	case resp.StatusCode == http.StatusNotModified:

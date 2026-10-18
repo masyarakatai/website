@@ -53,16 +53,21 @@ type Intervals struct {
 	PullRequests time.Duration
 	Contributors time.Duration
 	Stats        time.Duration
+	// Unauthenticated uses safer defaults for GitHub's 60 requests/hour budget.
+	Unauthenticated bool
 }
 
 func (i Intervals) withDefaults() Intervals {
 	def := func(v, d time.Duration) time.Duration {
 		if v <= 0 {
+			if i.Unauthenticated {
+				return d * 4
+			}
 			return d
 		}
 		return v
 	}
-	return Intervals{
+	result := Intervals{
 		Repo:         def(i.Repo, 5*time.Minute),
 		Releases:     def(i.Releases, 5*time.Minute),
 		Issues:       def(i.Issues, 2*time.Minute),
@@ -70,6 +75,7 @@ func (i Intervals) withDefaults() Intervals {
 		Contributors: def(i.Contributors, 30*time.Minute),
 		Stats:        def(i.Stats, 30*time.Minute),
 	}
+	return result
 }
 
 // Poller refreshes each dataset on its own schedule.
@@ -182,6 +188,12 @@ func (p *Poller) RefreshAll(ctx context.Context) {
 		}(f)
 	}
 	wg.Wait()
+	if source, ok := p.src.(interface{ RateLimit() github.RateLimit }); ok {
+		budget := source.RateLimit()
+		if !budget.Reset.IsZero() {
+			p.logf("github: rate limit remaining=%d reset=%s", budget.Remaining, budget.Reset.UTC().Format(time.RFC3339))
+		}
+	}
 }
 
 func (p *Poller) refreshRepo(ctx context.Context) {

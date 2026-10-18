@@ -195,3 +195,16 @@ func TestIntervals_Defaults(t *testing.T) {
 		t.Errorf("explicit Issues = %v, want 1s", got)
 	}
 }
+
+func TestIntervals_UnauthenticatedDefaultsAreConservative(t *testing.T) {
+	iv := (Intervals{Unauthenticated: true}).withDefaults()
+	if iv.Issues != 8*time.Minute || iv.PullRequests != 8*time.Minute {
+		t.Errorf("unauthenticated intervals = %+v", iv)
+	}
+}
+
+func TestIntervals_UnauthenticatedKeepsExplicitOverride(t *testing.T) {
+	if got := (Intervals{Unauthenticated: true, Issues: time.Minute}).withDefaults().Issues; got != time.Minute {
+		t.Errorf("Issues = %v, want explicit 1m", got)
+	}
+}

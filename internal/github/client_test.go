@@ -135,6 +135,21 @@ func TestNon2xxIsAnError(t *testing.T) {
 	}
 }
 
+func TestRateLimitIsRecordedFromEveryResponse(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("X-RateLimit-Remaining", "17")
+		w.Header().Set("X-RateLimit-Reset", "1760000000")
+		w.WriteHeader(http.StatusForbidden)
+	}))
+	defer srv.Close()
+	c := New("o", "r", "", WithBaseURL(srv.URL))
+	_, _ = c.Repo(context.Background())
+	got := c.RateLimit()
+	if got.Remaining != 17 || got.Reset.Unix() != 1760000000 {
+		t.Errorf("RateLimit = %+v", got)
+	}
+}
+
 func TestPullRequest_IsMerged(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte(`[
